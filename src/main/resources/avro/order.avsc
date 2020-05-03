@@ -1,0 +1,14 @@
+
+{
+	"namespace": "com.hcl.dna.ads.framework.process.model",
+	"type": "record",
+	"name": "Order",
+	"fields": [
+		{"name": "id", "type": "string"},
+		{"name": "productId", "type": "string"},
+		{"name": "customerId", "type": "string"},
+		{"name": "status", "type": "string"},
+		{"name": "payment", "type": "string"},
+		{"name": "shipment", "type": "string"}
+	]
+}
