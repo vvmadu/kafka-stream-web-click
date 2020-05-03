@@ -16,6 +16,7 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.*;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,7 +79,7 @@ public class StreamProcessInitiator1 {
         Map<String, String> stringConfig = new HashMap<>();
         stringConfig.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         Serde genericSerde = Serdes.String();
-        genericSerde.configure(stringConfig, false);
+        genericSerde.configure(stringConfig, true);
 
         SpecificAvroSerde<Customer> customerSerde = new SpecificAvroSerde<>();
         customerSerde.configure(serdeConfig, false);
@@ -117,14 +118,14 @@ public class StreamProcessInitiator1 {
                 }
         );
 
-        //detailedProductStream.mapValues(product -> product).to("DUMMY", Produced.with(stringSerde, productSerde));
+        detailedProductStream.mapValues(product -> product).to("DUMMY", Produced.with(stringSerde, productSerde));
 
         KStream<String, Order> orderStream = builder.stream(ApplicationConstants.CART_TOPIC,
                 Consumed.with(stringSerde, orderSerde));
 
         KStream<String, OrderDetail> detailsOfOrderStreamWithCustomer = orderStream.join(customerTable,
                 (orderKey, customerKey) -> {
-                    System.out.println("productStreamValue -> " + orderKey);
+                    System.out.println("productStreamValue ---> " + orderKey);
                     return orderKey;
                 },
                 (order, customer) -> {
@@ -154,11 +155,13 @@ public class StreamProcessInitiator1 {
                     System.out.println("Updated OrderDetails with Product data !!!");
                     return od;
                 },
-                JoinWindows.of(600000l)
+                JoinWindows.of(600000l),
+                Joined.with(stringSerde, orderDetailSerde, productSerde)
         );
 
         detailsOfOrderStreamWithCustomerProduct.mapValues(orderDetail -> orderDetail).to(ApplicationConstants.TRAGET_TOPIC,
                 Produced.with(stringSerde, orderDetailSerde));
+
         return builder.build();
     }
 }
