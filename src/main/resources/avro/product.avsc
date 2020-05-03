@@ -1,0 +1,11 @@
+
+{
+	"namespace": "com.hcl.dna.ads.framework.process.model",
+	"type": "record",
+	"name": "Product",
+	"fields": [
+		{"name": "id", "type": "string"},
+		{"name": "name", "type": "string"},
+		{"name": "sku", "type": "string"}
+	]
+}
